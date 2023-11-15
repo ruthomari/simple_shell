@@ -1,0 +1,86 @@
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
+
+#define MAX_INPUT_SIZE 1024
+#define MAX_ARGS 64
+
+
+/**
+ * Display the shell prompt.
+ */
+
+void display_prompt(void)
+{
+char prompt[] = "($) ";
+write(STDOUT_FILENO, prompt, sizeof(prompt) - 1);  // -1 to exclude the null terminator
+}
+
+/**
+ * Execute command with arguments in a child process.
+ * @param command - The command to be executed.
+ * @param args - An array of arguments for the command.
+ */
+
+void execute_command(char *command, char *args[])
+{
+pid_t pid = fork();
+
+if (pid == -1)
+{
+perror("fork");
+exit(EXIT_FAILURE);
+} else if (pid == 0)
+// Child process
+execvp(command, args);
+// If execvp fails, print an error message
+perror("execvp");
+exit(EXIT_FAILURE);
+} else
+// Parent process
+wait(NULL);
+}
+
+int main (void)
+{
+char input[MAX_INPUT_SIZE];
+char *args[MAX_ARGS];
+
+while (1)
+{
+display_prompt();
+
+// Read a line of input from the user
+if (fgets(input, sizeof(input), stdin) == NULL)
+{
+// Handle end of file condition (Ctrl+D)
+write(STDOUT_FILENO, "\n", 1);
+break;
+}
+
+// Remove the trailing newline character
+input[strcspn(input, "\n")] = '\0';
+
+// Tokenize the input into command and arguments
+char *token = strtok(input, " ");
+int i = 0;
+
+while (token != NULL && i < MAX_ARGS - 1)
+{
+args[i++] = token;
+token = strtok(NULL, " ");
+}
+
+args[i] = NULL;  // Null-terminate the arguments array
+
+if (i > 0)
+{
+// Execute the command with arguments
+execute_command(args[0], args);
+}
+}
+
+return 0;
+}
+
