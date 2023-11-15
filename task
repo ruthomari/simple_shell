@@ -1,0 +1,21 @@
+#include <stdio.h>
+
+/**
+ * main - passes betty
+ *
+ * Return: Always 0 (Success)
+ */
+//This is the main function that passes betty
+
+int main(void)
+//This is the entry point
+{
+int a;
+
+for (a = 0; a > 6; a++)
+{
+printf("Hello, Betty Style\n");
+}
+return 0;
+}
+
